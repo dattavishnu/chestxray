@@ -39,6 +39,12 @@ To get started, you will need the following Python packages(use python 3.7-3.11)
     ```
 
 ## File Structure
-
+my_project/
+├── .keras/
+│ └── model.h5
+├── static/
+│ └── index.html
+├── main.py
+└── README.md
 
 
