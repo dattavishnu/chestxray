@@ -42,10 +42,3 @@ To get started, you will need the following Python packages:
 
 
 
-├── .keras/                # Keras folder (for storing model files, etc.)
-├── static/                # Folder containing static files
-│   └── index.html         # Example HTML file
-├── main.py                # FastAPI app
-└── README.md              # Project requirements
-
-
