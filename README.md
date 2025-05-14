@@ -4,7 +4,7 @@ This project hosts a website that detects pneumonia by analyzing chest X-ray ima
 
 ## Requirements
 
-To get started, you will need the following Python packages:
+To get started, you will need the following Python packages(use python 3.7-3.11):
 
 - **TensorFlow**: For machine learning models.
 - **Matplotlib**: For plotting and visualizations.
