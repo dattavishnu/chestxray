@@ -1,4 +1,4 @@
-#chestxray
+#######chestxray
 
 This project hosts a website that detects pneumonia by analyzing chest X-ray images as input.
 
