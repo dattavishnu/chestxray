@@ -1,6 +1,6 @@
 #chestxray
 
-This is a project hosts website to detect pneumonia  by taking chestxray as input.  
+This project hosts a website that detects pneumonia by analyzing chest X-ray images as input.
 
 ## Requirements
 
