@@ -39,12 +39,15 @@ To get started, you will need the following Python packages(use python 3.7-3.11)
     ```
 
 ## File Structure
+
+```
 my_project/
-├── .keras/
-│ └── model.h5
-├── static/
-│ └── index.html
-├── main.py
-└── README.md
+├── .keras/                # Folder for Keras models
+│   └── model.h5           # Example model file
+├── static/                # Folder containing static files
+│   └── index.html         # Example HTML file
+├── main.py                # FastAPI app
+└── README.md              # Project documentation
+```
 
 
