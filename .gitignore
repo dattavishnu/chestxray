@@ -1,0 +1,12 @@
+# Ignore database and model files
+*.db
+*.keras
+*.h5
+
+# Ignore compiled Python files and cache
+__pycache__/
+*.pyc
+
+# Ignore folders
+test images/
+venv/
