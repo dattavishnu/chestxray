@@ -12,6 +12,25 @@ import sqlite3
 import os
 import io
 import google.generativeai as genai
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from pydantic import EmailStr
+import secrets
+import uuid
+
+conf = ConnectionConfig(
+    MAIL_USERNAME="havishnudatha@gmail.com",
+    MAIL_PASSWORD="rpuy fmxs navo tjvu",  # from Gmail App Passwords
+    MAIL_FROM="havishnudatha@gmail.com",
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_STARTTLS=True,       # replaces MAIL_TLS
+    MAIL_SSL_TLS=False,       # replaces MAIL_SSL
+    USE_CREDENTIALS=True,
+)
+
+# Temporary in-memory store for pending users (can use a DB table instead)
+pending_users = {}  # key: token, value: {username, password, email}
+
 
 # ---------------------- Setup ----------------------
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -80,8 +99,70 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
+async def register_form(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/verify-email")
+async def verify_email(token: str):
+    if token not in temp_users:
+        return {"message": "Invalid or expired token"}
+
+    user = temp_users.pop(token)
+    conn = sqlite3.connect("users.db")
+    try:
+        conn.execute(
+            "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
+            (user["username"], user["password"], user["email"])
+        )
+        conn.commit()
+        return {"message": "Email verified! You can now log in."}
+    except sqlite3.IntegrityError:
+        return {"message": "Username or email already exists"}
+    finally:
+        conn.close()
+
+
+temp_users = {}  # in-memory dict for testing (use Redis in prod)
+
+
+
+@app.post("/register")
+async def register(username: str = Form(...), password: str = Form(...), email: str = Form(...)):
+    # Check for duplicates in DB
+    conn = sqlite3.connect("users.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE username = ? OR email = ?", (username, email))
+    if cur.fetchone():
+        conn.close()
+        return {"message": "Username or email already exists"}
+    conn.close()
+
+    # Check if already pending
+    if any(u["username"] == username for u in temp_users.values()):
+        return {"message": "Pending verification for this username"}
+
+    # Hash and store temporarily
+    hashed = hash_password(password)
+    token = str(uuid.uuid4())
+    temp_users[token] = {"username": username, "email": email, "password": hashed}
+
+    # Send verification email
+    message = MessageSchema(
+        subject="Verify Your Email",
+        recipients=[email],
+        body=f"Click to verify: http://localhost:8000/verify-email?token={token}",
+        subtype="plain",
+    )
+    print(f"Verification link: http://localhost:8000/verify-email?token={token}")
+
+    fm = FastMail(conf)
+    try:
+        await fm.send_message(message)
+        return {"message": "Verification email sent!"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"Email failed: {str(e)}"})
+
+
 
 @app.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
@@ -98,21 +179,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
     return HTMLResponse("Invalid credentials", status_code=401)
 
-@app.post("/register")
-async def register(username: str = Form(...), password: str = Form(...), email: str = Form(...)):
-    hashed = hash_password(password)
-    conn = sqlite3.connect("users.db")
-    try:
-        conn.execute(
-            "INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
-            (username, hashed, email)
-        )
-        conn.commit()
-    except sqlite3.IntegrityError:
-        conn.close()
-        return {"message": "Username already exists"}
-    conn.close()
-    return {"message": "Registration successful!"}
+
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request, user: str = Depends(require_login)):
