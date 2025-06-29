@@ -19,7 +19,7 @@ import uuid
 
 conf = ConnectionConfig(
     MAIL_USERNAME="havishnudatha@gmail.com",
-    MAIL_PASSWORD="rpuy fmxs navo tjvu",  # from Gmail App Passwords
+    MAIL_PASSWORD="",  # from Gmail App Passwords
     MAIL_FROM="havishnudatha@gmail.com",
     MAIL_PORT=587,
     MAIL_SERVER="smtp.gmail.com",
