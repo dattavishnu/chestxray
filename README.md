@@ -50,3 +50,10 @@ my_project/
 ```
 
 
+### Output
+![alt text](<Screenshot 2025-07-24 190144-1.png>)
+
+![alt text](<Screenshot 2025-07-24 190217.png>)
+
+![alt text](<Screenshot 2025-07-24 190200.png>)
+
